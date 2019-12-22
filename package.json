@@ -1,0 +1,8 @@
+{
+  "name": "vest-cron",
+  "version": "0.0.1",
+  "description": "Unpublish cron",
+  "dependencies": {
+    "jsnpm": "^0.4.0"
+  }
+}

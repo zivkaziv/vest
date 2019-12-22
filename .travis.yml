@@ -1,0 +1,10 @@
+language: node_js
+node_js:
+  - 12
+version: 1.0
+
+before_install:
+  - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
+
+script:
+  - node unpublish.js
