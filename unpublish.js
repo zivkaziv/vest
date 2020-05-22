@@ -1,9 +1,7 @@
 const jsnpm = require('jsnpm');
 
-const PACKAGE_NAME = 'vest';
-
-const unpublish = async () => {
-    const versions = await jsnpm.versions(PACKAGE_NAME);
+const unpublish = async (packageName) => {
+    const versions = await jsnpm.versions(packageName);
     const nextOnly = versions.filter((v) => v.includes('next'));
 
     const one = async (i = 0) => {
@@ -13,11 +11,11 @@ const unpublish = async () => {
             return;
         }
 
-        console.log(`Unpublishing: ${PACKAGE_NAME}@${current}`);
+        console.log(`Unpublishing: ${packageName}@${current}`);
 
         try {
-            await jsnpm.unpublish(PACKAGE_NAME, current);
-        } catch(e) {
+            await jsnpm.unpublish(packageName, current);
+        } catch (e) {
             console.log(`Unable to unpublish: ${current}`, e);
         }
 
@@ -27,5 +25,10 @@ const unpublish = async () => {
     one();
 }
 
-unpublish();
+const runUnpublish = async () => {
+    await unpublish('vest');
+    await unpublish('eslint-plugin-vest');
+}
+
+runUnpublish();
 
