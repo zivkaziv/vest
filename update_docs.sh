@@ -20,8 +20,8 @@ echo "N4S: $N4S_VERSION"
 cd $TRAVIS_BUILD_DIR
 
 echo "Copying docs over"
-cp -R ./vest/packages/vest/docs/ vest_docs/
-cp -R ./vest/packages/n4s/docs/ n4s_docs/
+cp -a ./vest/packages/vest/docs/. vest_docs/
+cp -a ./vest/packages/n4s/docs/. n4s_docs/
 
 cd vest_docs
 git add .
