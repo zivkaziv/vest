@@ -6,9 +6,7 @@ import runRegisterSuite from '../../../testUtils/runRegisterSuite';
 import suiteIdByName from '../../../testUtils/suiteIdByName';
 import testDummy from '../../../testUtils/testDummy';
 import group from '../../hooks/group';
-import getState from '../suite/getState';
-import hasRemainingTests from '../suite/hasRemainingTests';
-import patch from '../suite/patch';
+import suite from '../suite';
 import {
   SEVERITY_COUNT_ERROR,
   SEVERITY_COUNT_WARN,
@@ -67,7 +65,7 @@ describe('module: produce', () => {
     suiteName = `suite_${counter()}`;
     resetState();
     runCreateSuite(suiteName);
-    state = getState(suiteId);
+    state = suite.getState(suiteId);
     testKeys = [
       ...new Set(state.testObjects.map(({ fieldName }) => fieldName)),
     ];
@@ -85,7 +83,7 @@ describe('module: produce', () => {
   });
 
   it('Should create a deep copy of subset of the state', () => {
-    expect(_.pick(getState(suiteId), KEPT_PROPERTIES)).isDeepCopyOf(
+    expect(_.pick(suite.getState(suiteId), KEPT_PROPERTIES)).isDeepCopyOf(
       _.pick(produced, KEPT_PROPERTIES)
     );
   });
@@ -129,7 +127,7 @@ describe('module: produce', () => {
         it('Should return all statement messages for failed field', () => {
           errors.forEach(field => {
             expect(produced.getErrors(field)).toEqual(
-              produce(getState(suiteId)).tests[field].errors
+              produce(suite.getState(suiteId)).tests[field].errors
             );
           });
         });
@@ -139,7 +137,7 @@ describe('module: produce', () => {
           const failures = errors.reduce(
             (failures, key) =>
               Object.assign(failures, {
-                [key]: produce(getState(suiteId)).tests[key].errors,
+                [key]: produce(suite.getState(suiteId)).tests[key].errors,
               }),
             {}
           );
@@ -159,7 +157,7 @@ describe('module: produce', () => {
       it('Should return all statement messages for failed field', () => {
         warnings.forEach(field => {
           expect(produced.getWarnings(field)).toEqual(
-            produce(getState(suiteId)).tests[field].warnings
+            produce(suite.getState(suiteId)).tests[field].warnings
           );
         });
       });
@@ -169,7 +167,7 @@ describe('module: produce', () => {
         const failures = warnings.reduce(
           (failures, key) =>
             Object.assign(failures, {
-              [key]: produce(getState(suiteId)).tests[key].warnings,
+              [key]: produce(suite.getState(suiteId)).tests[key].warnings,
             }),
           {}
         );
@@ -182,7 +180,7 @@ describe('module: produce', () => {
       it('Should return the error count of the field', () => {
         testKeys.forEach(key => {
           expect(produced.hasErrors(key)).toBe(
-            !!produce(getState(suiteId)).tests[key].errorCount
+            !!produce(suite.getState(suiteId)).tests[key].errorCount
           );
         });
       });
@@ -190,7 +188,7 @@ describe('module: produce', () => {
     describe('When invoked without field name', () => {
       it('Should return the error count of the whole suite', () => {
         expect(produced.hasErrors()).toBe(
-          !!produce(getState(suiteId)).errorCount
+          !!produce(suite.getState(suiteId)).errorCount
         );
       });
     });
@@ -200,7 +198,7 @@ describe('module: produce', () => {
       it('Should return the warning count of the field', () => {
         testKeys.forEach(key => {
           expect(produced.hasWarnings(key)).toBe(
-            !!produce(getState(suiteId)).tests[key].warnCount
+            !!produce(suite.getState(suiteId)).tests[key].warnCount
           );
         });
       });
@@ -208,7 +206,7 @@ describe('module: produce', () => {
     describe('When invoked without field name', () => {
       it('Should return the warn count of the whole suite', () => {
         expect(produced.hasWarnings()).toBe(
-          !!produce(getState(suiteId)).warnCount
+          !!produce(suite.getState(suiteId)).warnCount
         );
       });
     });
@@ -423,8 +421,8 @@ describe('module: produce', () => {
     describe('When no async tests', () => {
       it('Sanity', () => {
         runRegisterSuite({ name: suiteId });
-        const state = getState(suiteId);
-        expect(hasRemainingTests(state)).toBe(false);
+        const state = suite.getState(suiteId);
+        expect(suite.hasRemainingTests(state)).toBe(false);
       });
 
       describe('When invoked without a field name', () => {
@@ -490,7 +488,7 @@ describe('module: produce', () => {
 
     describe('When async (has remaining tests)', () => {
       beforeEach(() => {
-        state = patch(suiteId, state => ({
+        state = suite.patch(suiteId, state => ({
           ...state,
           pending: state.pending.concat({ fieldName: 'field_1' }),
           isAsync: true,
@@ -499,7 +497,7 @@ describe('module: produce', () => {
       });
 
       it('Sanity', () => {
-        expect(hasRemainingTests(state)).toBe(true);
+        expect(suite.hasRemainingTests(state)).toBe(true);
       });
 
       describe('When invoked without field name', () => {
@@ -519,7 +517,7 @@ describe('module: produce', () => {
             // that in produce().done() we wrap the callback - so we don't have
             // access to it. Instead what we do here is only allow the test to
             // finish if the callback runs.
-            getState(suiteId).doneCallbacks[0]();
+            suite.getState(suiteId).doneCallbacks[0]();
           }));
       });
 
@@ -542,14 +540,14 @@ describe('module: produce', () => {
             new Promise(done => {
               const produced = runCreateSuite();
               expect(
-                getState(suiteName).fieldCallbacks['field_1']
+                suite.getState(suiteName).fieldCallbacks['field_1']
               ).toBeUndefined();
 
               // The test will pass only when done gets called.
               produced.done('field_1', done);
 
               expect(
-                getState(suiteName).fieldCallbacks['field_1']
+                suite.getState(suiteName).fieldCallbacks['field_1']
               ).not.toBeUndefined();
             }));
         });
@@ -559,12 +557,12 @@ describe('module: produce', () => {
             const produced = runCreateSuite();
             suiteId = suiteIdByName(suiteName);
             expect(
-              getState(suiteId).fieldCallbacks['sync_field_2']
+              suite.getState(suiteId).fieldCallbacks['sync_field_2']
             ).toBeUndefined();
             produced.done('sync_field_2', doneCallback_2);
             expect(doneCallback_2).toHaveBeenCalled();
             expect(
-              getState(suiteId).fieldCallbacks['sync_field_2']
+              suite.getState(suiteId).fieldCallbacks['sync_field_2']
             ).toBeUndefined();
           });
         });

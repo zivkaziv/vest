@@ -1,11 +1,11 @@
 import _ from 'lodash';
+import suite from '..';
 import vest from '../../..';
 import resetState from '../../../../testUtils/resetState';
 import runRegisterSuite from '../../../../testUtils/runRegisterSuite';
 import testDummy from '../../../../testUtils/testDummy';
 import * as state from '../../state';
 import { KEY_CANCELED, KEY_SUITES } from '../../state/constants';
-import getState from '../getState';
 import remove from '.';
 
 const suiteId = 'suite_id';
@@ -60,7 +60,7 @@ describe('remove', () => {
     test.skipOnWatch(
       'Sanity - making sure everything works as it should',
       () => {
-        const suiteState = getState(suiteId);
+        const suiteState = suite.getState(suiteId);
         expect(suiteState.lagging).toHaveLength(2);
         expect(suiteState.pending).toHaveLength(2);
         expect(suiteState.lagging[0].fieldName).toBe('field_1');
@@ -73,15 +73,15 @@ describe('remove', () => {
 
     it('Should remove suite from state', () => {
       expect(state.get()[KEY_SUITES]).toHaveProperty(suiteId);
-      expect(() => getState(suiteId)).not.toThrow();
+      expect(() => suite.getState(suiteId)).not.toThrow();
       remove(suiteId);
-      expect(() => getState(suiteId)).toThrow();
+      expect(() => suite.getState(suiteId)).toThrow();
       expect(state.get()[KEY_SUITES]).not.toHaveProperty(suiteId);
     });
 
     it('Should set all pending and lagging tests as canceled', () => {
       const previouslyCanceled = state.get()[KEY_CANCELED];
-      const currentState = getState(suiteId);
+      const currentState = suite.getState(suiteId);
       const allCanceled = [
         ...currentState.lagging,
         ...currentState.pending,

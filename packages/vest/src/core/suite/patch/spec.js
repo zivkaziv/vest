@@ -1,8 +1,8 @@
+import suite from '..';
 import resetState from '../../../../testUtils/resetState';
 import runRegisterSuite from '../../../../testUtils/runRegisterSuite';
 import { OPERATION_MODE_STATEFUL } from '../../../constants';
 import * as state from '../../state';
-import getState from '../getState';
 import patch from '.';
 
 const suiteName = 'suite_1';
@@ -11,7 +11,7 @@ const suiteId = 'suiteId_1';
 let context;
 
 describe('patch', () => {
-  let patcher, suite, suiteState, prevState;
+  let patcher, suiteState, prevState;
 
   beforeEach(() => {
     resetState();
@@ -27,9 +27,7 @@ describe('patch', () => {
       patcher = jest.fn(state => ({ ...state, ...{ k: 'v' } }));
       resetState();
       runRegisterSuite(context);
-      suite = state.getSuite(suiteId);
-      suiteState = suite[0];
-      prevState = suite[1];
+      [suiteState, prevState] = state.getSuite(suiteId);
       patch(suiteId, patcher);
     });
     it('Should set current state value to patcher argument return value', () => {
@@ -40,7 +38,7 @@ describe('patch', () => {
     });
 
     it('Should return next state', () => {
-      expect(patch(suiteId, patcher)).toBe(getState(suiteId));
+      expect(patch(suiteId, patcher)).toBe(suite.getState(suiteId));
     });
   });
   describe('When patcher is not a function', () => {

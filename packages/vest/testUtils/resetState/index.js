@@ -1,6 +1,6 @@
 import { OPERATION_MODE_STATEFUL } from '../../src/constants';
 import * as state from '../../src/core/state';
-import getState from '../../src/core/suite/getState';
+import suite from '../../src/core/suite';
 import runRegisterSuite from '../runRegisterSuite';
 
 const resetState = (suiteId, suiteName = suiteId) => {
@@ -13,7 +13,7 @@ const resetState = (suiteId, suiteName = suiteId) => {
       name: suiteName,
       operationMode: OPERATION_MODE_STATEFUL,
     });
-    return getState(suiteId);
+    return suite.getState(suiteId);
   }
 };
 

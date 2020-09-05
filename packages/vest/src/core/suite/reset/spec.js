@@ -1,17 +1,16 @@
+import suite from '..';
 import { dummyTest } from '../../../../testUtils/testDummy';
 import get from '../../../hooks/get';
-import create from '../create';
-import getState from '../getState';
 import reset from '.';
 
-const validate = create('suite', () => {
+const validate = suite.create('suite', () => {
   dummyTest.failing('f1', 'm1');
   dummyTest.failing('f2', 'm2');
   dummyTest.passingWarning('f3', 'm3');
   dummyTest.failingWarning('f2', 'm2');
 });
 
-describe('vest.reset', () => {
+describe('suite.reset', () => {
   const initialState = get('suite');
 
   test('sanity', () => {
@@ -34,7 +33,7 @@ describe('vest.reset', () => {
 
   it('Should initialize suite when not found', () => {
     const name = 'nonexistent_suite';
-    expect(() => getState(name)).toThrow();
+    expect(() => suite.getState(name)).toThrow();
     const expected = {
       ...initialState,
       name,

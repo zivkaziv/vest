@@ -3,9 +3,7 @@ import runWithContext from '../../../lib/runWithContext';
 import Context from '../../Context';
 import * as state from '../../state';
 import { KEY_CANCELED } from '../../state/constants';
-import cleanupCompleted from '../../suite/cleanupCompleted';
-import getState from '../../suite/getState';
-import hasRemainingTests from '../../suite/hasRemainingTests';
+import suite from '../../suite';
 import { removeCanceled } from '../lib/canceled';
 import { removePending } from '../lib/pending';
 
@@ -70,16 +68,16 @@ const runAsyncTest = testObject => {
  * @param {string} [fieldName] Field name with associated callbacks.
  */
 const runDoneCallbacks = (suiteId, fieldName) => {
-  const suiteState = getState(suiteId);
+  const suiteState = suite.getState(suiteId);
   if (fieldName) {
     if (
-      !hasRemainingTests(suiteState, fieldName) &&
+      !suite.hasRemainingTests(suiteState, fieldName) &&
       Array.isArray(suiteState.fieldCallbacks[fieldName])
     ) {
       suiteState.fieldCallbacks[fieldName].forEach(cb => cb());
     }
   }
-  if (!hasRemainingTests(suiteState)) {
+  if (!suite.hasRemainingTests(suiteState)) {
     suiteState.doneCallbacks.forEach(cb => cb());
   }
 };
@@ -95,7 +93,7 @@ const onAsyncTestFinished = (testObject, operationMode) => {
   runDoneCallbacks(suiteId, fieldName);
 
   if (operationMode === OPERATION_MODE_STATELESS) {
-    cleanupCompleted(suiteId);
+    suite.cleanupCompleted(suiteId);
   }
 };
 

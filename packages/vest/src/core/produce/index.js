@@ -1,11 +1,10 @@
 import createCache from '../../lib/cache';
 import copy from '../../lib/copy';
-import hasRemainingTests from '../suite/hasRemainingTests';
-import patch from '../suite/patch';
 import {
   SEVERITY_GROUP_ERROR,
   SEVERITY_GROUP_WARN,
 } from '../test/lib/VestTest/constants';
+import done from './done';
 import genTestsSummary, { countFailures } from './genTestsSummary';
 import get from './get';
 import getByGroup from './getByGroup';
@@ -13,53 +12,6 @@ import has from './has';
 import hasByGroup from './hasByGroup';
 
 const cache = createCache(20);
-
-/**
- * Registers done callbacks.
- * @param {Object} state
- * @param {string} [fieldName]
- * @param {Function} doneCallback
- * @register {Object} Vest output object.
- */
-const done = (state, ...args) => {
-  const { length, [length - 1]: callback, [length - 2]: fieldName } = args;
-
-  const output = produce(state);
-
-  // If we do not have any tests for current field
-  const shouldSkipRegistration = fieldName && !output.tests[fieldName];
-
-  if (typeof callback !== 'function' || shouldSkipRegistration) {
-    return output;
-  }
-
-  // This won't be cached. Because we do not know where in the
-  // Lifecycle of our validations this produce will run, the test may be
-  // outdated and we might even not have a reference for it, so we're spreading
-  // to skip the cache.
-  const cb = () => callback(produce({ ...state }, { draft: true }));
-  const isFinishedTest = fieldName && !hasRemainingTests(state, fieldName);
-  const isSuiteFinished = !hasRemainingTests(state);
-  const shouldRunCallback = isFinishedTest || isSuiteFinished;
-  if (shouldRunCallback) {
-    cb();
-    return output;
-  }
-
-  patch(state.suiteId, state => {
-    if (fieldName) {
-      state.fieldCallbacks[fieldName] = [].concat(
-        ...(state.fieldCallbacks[fieldName] || []),
-        cb
-      );
-    } else {
-      state.doneCallbacks.push(cb);
-    }
-    return state;
-  });
-
-  return output;
-};
 
 /**
  * @returns {Object} with only public properties.
@@ -111,7 +63,7 @@ const produce = (state, { draft } = {}) =>
               getByGroup.bind(null, state, SEVERITY_GROUP_WARN),
             ],
           ]
-            .concat(draft ? [] : [['done', done.bind(null, state)]])
+            .concat(draft ? [] : [['done', done.bind(null, state, produce)]])
             .reduce((properties, [name, value]) => {
               properties[name] = {
                 configurable: true,

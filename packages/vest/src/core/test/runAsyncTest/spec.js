@@ -5,9 +5,7 @@ import runWithContext from '../../../lib/runWithContext';
 import Context from '../../Context';
 import * as state from '../../state';
 import { KEY_CANCELED } from '../../state/constants';
-import getState from '../../suite/getState';
-import patch from '../../suite/patch';
-import register from '../../suite/register';
+import suite from '../../suite';
 import VestTest from '../lib/VestTest';
 import { setPending } from '../lib/pending';
 import runAsyncTest from '.';
@@ -36,8 +34,8 @@ describe.each([CASE_PASSING, CASE_FAILING])('runAsyncTest: %s', testCase => {
       operationMode: OPERATION_MODE_STATEFUL,
     });
 
-    register(context);
-    patch(suiteId, state => ({
+    suite.register(context);
+    suite.patch(suiteId, state => ({
       ...state,
       fieldCallbacks: {
         ...state.fieldCallbacks,
@@ -62,8 +60,8 @@ describe.each([CASE_PASSING, CASE_FAILING])('runAsyncTest: %s', testCase => {
 
   describe('State updates', () => {
     test('Initial state matches snapshot (sanity)', () => {
-      expect(getState(suiteId).pending).toContain(testObject);
-      expect(getState(suiteId)).toMatchSnapshot();
+      expect(suite.getState(suiteId).pending).toContain(testObject);
+      expect(suite.getState(suiteId)).toMatchSnapshot();
       runRunAsyncTest(testObject);
     });
 
@@ -71,7 +69,7 @@ describe.each([CASE_PASSING, CASE_FAILING])('runAsyncTest: %s', testCase => {
       new Promise(done => {
         runRunAsyncTest(testObject);
         setTimeout(() => {
-          expect(getState(suiteId).pending).not.toContain(testObject);
+          expect(suite.getState(suiteId).pending).not.toContain(testObject);
           done();
         });
       }));
@@ -83,17 +81,17 @@ describe.each([CASE_PASSING, CASE_FAILING])('runAsyncTest: %s', testCase => {
           state[KEY_CANCELED][testObject.id] = true;
           return state;
         });
-        currentState = _.cloneDeep(getState(suiteId));
+        currentState = _.cloneDeep(suite.getState(suiteId));
       });
 
       it('Should remove test from pending array', () => {
-        expect(getState(suiteId).pending).toEqual(
+        expect(suite.getState(suiteId).pending).toEqual(
           expect.arrayContaining([testObject])
         );
         runRunAsyncTest(testObject);
         return new Promise(done => {
           setTimeout(() => {
-            expect(getState(suiteId).pending).toEqual(
+            expect(suite.getState(suiteId).pending).toEqual(
               expect.not.arrayContaining([testObject])
             );
             done();
@@ -116,7 +114,7 @@ describe.each([CASE_PASSING, CASE_FAILING])('runAsyncTest: %s', testCase => {
         new Promise(done => {
           runRunAsyncTest(testObject);
           setTimeout(() => {
-            expect(_.omit(getState(suiteId), 'pending')).toEqual(
+            expect(_.omit(suite.getState(suiteId), 'pending')).toEqual(
               _.omit(currentState, 'pending')
             );
             done();
@@ -131,7 +129,7 @@ describe.each([CASE_PASSING, CASE_FAILING])('runAsyncTest: %s', testCase => {
       fieldCallback_1 = jest.fn();
       fieldCallback_2 = jest.fn();
       doneCallback = jest.fn();
-      patch(suiteId, state => ({
+      suite.patch(suiteId, state => ({
         ...state,
         fieldCallbacks: {
           ...state.fieldCallbacks,

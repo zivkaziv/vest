@@ -1,8 +1,8 @@
+import suite from '..';
 import resetState from '../../../../testUtils/resetState';
 import runRegisterSuite from '../../../../testUtils/runRegisterSuite';
 import { OPERATION_MODE_STATEFUL } from '../../../constants';
 import * as state from '../../state';
-import patch from '../patch';
 
 const suiteName = 'suite_1';
 const suiteId = 'suiteId_1';
@@ -31,11 +31,11 @@ describe('registerSuite', () => {
   });
 
   describe('When suite exists in state', () => {
-    let suite;
+    let suiteState;
     beforeEach(() => {
       runRegisterSuite(context);
-      suite = state.getSuite(suiteId);
-      prevSuiteState = suite[0];
+      suiteState = state.getSuite(suiteId);
+      prevSuiteState = suiteState[0];
       runRegisterSuite({ ...context });
     });
     it('Should move prev prevSuiteState into second array cell', () => {
@@ -48,7 +48,7 @@ describe('registerSuite', () => {
         beforeEach(() => {
           pending = [jest.fn(), jest.fn(), jest.fn()];
           lagging = [jest.fn(), jest.fn(), jest.fn()];
-          patch(suiteId, state => ({
+          suite.patch(suiteId, state => ({
             ...state,
             pending,
             lagging,
@@ -56,21 +56,21 @@ describe('registerSuite', () => {
           runRegisterSuite(context);
         });
         it('Should merge previous pending and lagging into lagging', () => {
-          expect(suite[0].lagging).isDeepCopyOf([...pending, ...lagging]);
+          expect(suiteState[0].lagging).isDeepCopyOf([...pending, ...lagging]);
         });
 
         it('Should match snapshot', () => {
-          expect(suite).toMatchSnapshot();
+          expect(suiteState).toMatchSnapshot();
         });
       });
       it('Should nullify prevState pending and lagging', () => {
-        expect(suite[1].lagging).toBeNull();
-        expect(suite[1].pending).toBeNull();
+        expect(suiteState[1].lagging).toBeNull();
+        expect(suiteState[1].pending).toBeNull();
       });
     });
 
     it('Should match snapshot', () => {
-      expect(suite).toMatchSnapshot();
+      expect(suiteState).toMatchSnapshot();
     });
   });
 });

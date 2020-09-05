@@ -21,7 +21,7 @@ const INITIAL_SUITE_STATE = (suiteId, name) => ({
 /**
  * Registers a new suite run.
  */
-const registerSuite = () => {
+const register = () => {
   const context = Context.use();
   const { name, suiteId } = context;
   let suite = getSuite(suiteId);
@@ -55,4 +55,4 @@ const registerSuite = () => {
   });
 };
 
-export default registerSuite;
+export default register;
