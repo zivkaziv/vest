@@ -206,7 +206,6 @@ declare module 'vest' {
     id: string;
     isWarning: boolean;
     statement: string;
-    suiteId: string;
     testFn: TestCB;
     asyncTest?: Promise<string | void>;
   }
